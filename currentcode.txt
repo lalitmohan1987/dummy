@@ -1,0 +1,153 @@
+public with sharing class Cybersource_Controller{
+
+    static Map<string,string> oPassedParams = new Map<String,String>();  
+    private String locale = 'en';
+    public String transaction_type{get;set;}
+    public String reference_number{get;set;}
+    public String amount {get;set;}
+    public String currency1{get;set;}
+    public String payment_method {get;set;}
+    public String bill_to_forename {get;set;}
+     public String bill_to_company_name{get;set;}
+    public String bill_to_surname {get;set;}
+    public String bill_to_email {get;set;}
+    public String bill_to_phone{get;set;}
+    public String bill_to_address_line1 {get;set;}
+    public String bill_to_address_city {get;set;}
+    public String bill_to_address_state{get;set;}
+    public String bill_to_address_postal_code {get;set;}
+    public String bill_to_address_country{get;set;}
+    public static String  c='2b4e084465114b9394816629358d17efce8a15645dd34e6f939560b0e9479c5075b4b6d551194515a8c6f3bd7d977c00c8d3cbbfb5ee40c888d90bfb8046260be95432d9c915444596c8cb6e9b4e126c0411b73d301d4246b6dbba59165caaf63cb8fcfae6484ea9858b5802681de86a2770a462eb3c4bc6bf5b37d2da6b8b84';
+    public static string profile_id='5BA09866-C271-48AB-963E-EAB37E730B59';
+    public static string access_key ='d67690626a223feba03e14a065901a7e';
+    public Static String result;
+    private String signed_date_time = getUTCDateTime();
+    public boolean enabled = true;
+
+    public boolean getEnabled(){
+
+      return enabled;
+
+    }
+
+    
+    public void save()
+    
+    
+    {
+         Uuid myUuid = new Uuid();
+        String myUuidValue = myUuid.getValue();
+    
+        system.debug('----------Constrcutor---------'+bill_to_forename); 
+
+        oPassedParams.put('access_key',getAccesskey());
+        oPassedParams.put('profile_id', getproifleid());
+        oPassedParams.put('transaction_uuid',myUuidValue );
+        oPassedParams.put('signed_field_names','access_key,profile_id,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency,payment_method,bill_to_forename,bill_to_surname,bill_to_email,bill_to_phone,bill_to_address_state,bill_to_address_line1,bill_to_address_city,bill_to_address_country,bill_to_address_postal_code');
+        oPassedParams.put('unsigned_field_names','card_type,card_number,card_expiry_date,card_cvn'); 
+        oPassedParams.put('signed_date_time',signed_date_time );
+        oPassedParams.put('locale',locale );
+        oPassedParams.put('transaction_type',transaction_type);
+        oPassedParams.put('reference_number',reference_number );
+        oPassedParams.put('amount',amount);
+        oPassedParams.put('currency',currency1);
+        oPassedParams.put('payment_method',payment_method );
+        oPassedParams.put('bill_to_forename',bill_to_forename);
+        oPassedParams.put('bill_to_surname',bill_to_surname);
+        oPassedParams.put('bill_to_email',bill_to_email);
+        oPassedParams.put('bill_to_phone',bill_to_phone);
+        oPassedParams.put('bill_to_address_state',bill_to_address_state);
+        oPassedParams.put('bill_to_address_line1',bill_to_address_line1);
+        oPassedParams.put('bill_to_address_city',bill_to_address_city);
+        oPassedParams.put('bill_to_address_country',bill_to_address_country);
+        oPassedParams.put('bill_to_address_postal_code',bill_to_address_postal_code);
+     
+        system.debug('----------oPassedParams---------'+oPassedParams); 
+        enabled = false;
+    }
+  
+     private Static String secret_key(){
+     
+       return String.valueof(EncodingUtil.base64decode(c));
+   }
+    Public static String getproifleid(){
+    
+     String KeyString =EncodingUtil.base64Encode(Blob.valueOf(profile_id));
+      return  String.valueof(EncodingUtil.base64Decode(keyString));
+
+      
+    }
+  
+    Public static String getAccesskey(){
+      return String.valueof(EncodingUtil.base64decode(access_key));
+   }
+      public String getSignedData(){
+        //Map<string,string> oPassedParams = ApexPages.currentPage().getParameters();
+        String result = '';
+        result += '<input type="hidden" id="signature" name="signature" value="' + Cybersource_Controller.sign(oPassedParams) + '"/>';
+                        system.debug('----------result ---------'+result); 
+
+        return result;
+    }
+     public String getUTCDateTime(){
+        DateTime oUTSDateTime = System.now();//Original code was DateTime.Now.ToUniversalTime(); ... possible issues with the date time format
+        String strUTCDateTime = oUTSDateTime.format('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'');
+        return strUTCDateTime;
+    }
+     public String getParametersValues(){
+        //Map<string,string> oPassedParams = ApexPages.currentPage().getParameters();
+        String result = '';
+        
+       for (String oKey : oPassedParams.KeySet()){ 
+            result += '<div>';
+            result += '<input type="hidden" id="' + oKey + '" name="' + oKey + '" value="' + oPassedParams.get(oKey) + '"/>';
+            result += '</div>';
+        }
+                system.debug('----------getParametersValues---------'+result); 
+
+        return result;
+    }
+    
+    public String getParametersValuesHidden(){
+        //Map<string,string> oPassedParams = ApexPages.currentPage().getParameters();
+        String result = '';
+        for (String oKey : oPassedParams.KeySet()){ 
+            result += '<input type="hidden" id="' + oKey + '" name="' + oKey + '" value="' + oPassedParams.get(oKey) + '"/>';
+        }
+         system.debug('----------getParametersValuesHidden---------'+result); 
+        return result;
+    }
+    public static String sign(Map<string, string> paramsArray)  {
+       result = sign(buildDataToSign(paramsArray), secret_key());
+       system.debug('----------result---------'+result); 
+        return result;
+    }
+    private static String buildDataToSign(Map<string,string> paramsArray) {
+           system.debug('----------paramsArray---------'+paramsArray); 
+        String[] signedFieldNames = paramsArray.get('signed_field_names').Split(',');
+        List<string> dataToSign = new List<string>();
+
+        for (String oSignedFieldName : signedFieldNames){
+             dataToSign.Add(oSignedFieldName + '=' + paramsArray.get(oSignedFieldName));
+        }
+               system.debug('----------dataToSign---------'+dataToSign); 
+
+        return commaSeparate(dataToSign);
+    }
+    private static String commaSeparate(List<string> dataToSign) {
+        String result = '';
+        for(String Str : dataToSign) {
+            result += (result==''?'':',')+Str;
+              system.debug('----------result1---------'+result); 
+            
+        }
+        return result;                         
+    }
+    private static String sign(String data, String secretKey) {
+        String result = EncodingUtil.base64Encode(Crypto.generateMac('HMacSHA256', Blob.valueOf(data), Blob.valueOf(secretKey)));
+        return result;
+    }
+    
+    
+     
+    }
