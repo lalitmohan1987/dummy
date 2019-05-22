@@ -1,6 +1,6 @@
 public with sharing class Cybersource_Controller{
 
-    static Map<string,string> oPassedParams = new Map<String,String>();  
+    public static Map<string,string> oPassedParams = new Map<String,String>();  
     private String locale = 'en';
     public String transaction_type{get;set;}
     public String reference_number{get;set;}
