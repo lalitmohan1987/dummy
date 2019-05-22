@@ -66,6 +66,8 @@ public with sharing class Cybersource_Controller{
         enabled = false;
     }
   
+     //Decode the key
+ 
      private Static String secret_key(){
      
        return String.valueof(EncodingUtil.base64decode(c));
@@ -117,6 +119,7 @@ public with sharing class Cybersource_Controller{
          system.debug('----------getParametersValuesHidden---------'+result); 
         return result;
     }
+//Creating the signature
     public static String sign(Map<string, string> paramsArray)  {
        result = sign(buildDataToSign(paramsArray), secret_key());
        system.debug('----------result---------'+result); 
@@ -130,7 +133,7 @@ public with sharing class Cybersource_Controller{
         for (String oSignedFieldName : signedFieldNames){
              dataToSign.Add(oSignedFieldName + '=' + paramsArray.get(oSignedFieldName));
         }
-               system.debug('----------dataToSign---------'+dataToSign); 
+               system.debug('-----dataToSign----'+dataToSign); 
 
         return commaSeparate(dataToSign);
     }
