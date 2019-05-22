@@ -1,5 +1,5 @@
 public with sharing class Cybersource_Controller{
-
+//Integration of cybersource
     public static Map<string,string> oPassedParams = new Map<String,String>();  
     private String locale = 'en';
     public String transaction_type{get;set;}
@@ -33,7 +33,7 @@ public with sharing class Cybersource_Controller{
     
     public void save()
     
-    
+    //when we click the save button
     {
          Uuid myUuid = new Uuid();
         String myUuidValue = myUuid.getValue();
